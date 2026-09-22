@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VibeSight AI Camera</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap"
+  >
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+    }
+
+    .font-heading {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .category-selector {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+      margin-bottom: 14px;
+    }
+
+    .category-btn {
+      background: #1e293b;
+      color: #94a3b8;
+      border: 1px solid #334155;
+      padding: 10px 6px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .category-btn:hover {
+      background: #334155;
+      color: #f8fafc;
+    }
+
+    .category-btn.active {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #3b82f6;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+
+    .language-btn {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid #334155;
+      padding: 8px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .language-btn:hover:not(:disabled) {
+      background: #334155;
+      color: #ffffff;
+      border-color: #64748b;
+    }
+
+    .language-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .language-btn.active {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #3b82f6;
+    }
+
+    .pulse {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+      animation: pulse-animation 1.8s infinite;
+    }
+
+    @keyframes pulse-animation {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+      }
+
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+      }
+
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+      }
+    }
+
+    .shutter-flash {
+      animation: flash-effect 0.3s ease-out;
+    }
+
+    @keyframes flash-effect {
+      0% {
+        opacity: 0.2;
+      }
+
+      50% {
+        opacity: 1;
+        background-color: white;
+      }
+
+      100% {
+        opacity: 0.2;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  
+    .secondary-btn {
+      border: 1px solid #d1d5db;
+      background: #f3f4f6;
+      color: #111827;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .secondary-btn:hover:not(:disabled) {
+      background: #e5e7eb;
+    }
+
+    .secondary-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+</style>
+</head>
+
+<body class="p-4 md:p-6 lg:p-8 flex flex-col min-h-screen">
+
+  <!-- Header -->
+  <header class="max-w-6xl mx-auto w-full flex flex-col sm:flex-row justify-between items-center pb-6 mb-6 border-b border-slate-800 gap-4">
+
+    <div class="flex items-center gap-3">
+      <div class="bg-gradient-to-tr from-blue-600 to-indigo-500 p-3 rounded-2xl shadow-lg shadow-blue-500/20">
+        <i class="fa-solid fa-eye text-2xl text-white"></i>
+      </div>
+
+      <div>
+        <h1 class="text-2xl font-bold font-heading bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+          VibeSight AI Camera
+        </h1>
+
+        <p class="text-xs text-slate-400">
+          Multimodal Scene Intelligence
+        </p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3 flex-wrap justify-center">
+
+      <span
+        id="live-indicator"
+        class="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-full text-xs font-medium text-emerald-400"
+      >
+        <span class="pulse"></span>
+        Live Stream
+      </span>
+
+      <button
+        id="toggle-camera-btn"
+        type="button"
+        class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-2"
+      >
+        <i class="fa-solid fa-camera-rotate"></i>
+        Switch Camera
+      </button>
+
+      <button
+        id="api-key-btn"
+        type="button"
+        class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-2"
+      >
+        <i class="fa-solid fa-key"></i>
+        API Key
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow">
+
+    <!-- LEFT: CAMERA -->
+    <section class="lg:col-span-7 flex flex-col gap-4">
+
+      <div class="relative glass-card rounded-2xl overflow-hidden shadow-2xl border border-slate-800 aspect-video bg-black flex items-center justify-center group">
+
+        <video
+          id="webcam"
+          autoplay
+          playsinline
+          muted
+          class="w-full h-full object-cover"
+        ></video>
+
+        <canvas id="capture-canvas" class="hidden"></canvas>
+
+        <div
+          id="flash-overlay"
+          class="absolute inset-0 pointer-events-none opacity-0"
+        ></div>
+
+        <!-- Badges -->
+        <div class="absolute top-4 left-4 flex flex-wrap gap-2 pointer-events-none">
+
+          <span
+            id="badge-category"
+            class="bg-slate-900/80 backdrop-blur-md border border-slate-700 text-blue-400 text-xs px-3 py-1 rounded-full font-semibold hidden"
+          ></span>
+
+          <span
+            id="badge-mode"
+            class="bg-slate-900/80 backdrop-blur-md border border-slate-700 text-emerald-400 text-xs px-3 py-1 rounded-full font-semibold"
+          >
+            📸 Manual Snap Mode
+          </span>
+
+        </div>
+
+        <!-- Camera fallback -->
+        <div
+          id="camera-fallback"
+          class="hidden absolute inset-0 flex flex-col items-center justify-center bg-slate-900 p-6 text-center"
+        >
+
+          <i class="fa-solid fa-video-slash text-4xl text-slate-600 mb-3"></i>
+
+          <p class="text-sm text-slate-300 font-medium mb-4">
+            Camera feed unavailable or permission denied.
+          </p>
+
+          <label class="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-blue-600/30">
+
+            <i class="fa-solid fa-upload"></i>
+            Upload Image File
+
+            <input
+              type="file"
+              id="file-input"
+              class="file-input-element hidden"
+              accept="image/*"
+            >
+
+          </label>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 sm:gap-3 bg-slate-900/80 backdrop-blur-md p-2 rounded-2xl border border-slate-700/60 shadow-xl max-w-[95%]">
+
+          <button
+            id="snap-btn"
+            type="button"
+            class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-semibold px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 shadow-lg shadow-blue-600/30 whitespace-nowrap"
+          >
+            <i class="fa-solid fa-camera"></i>
+            Snap & Analyze
+          </button>
+
+          <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-upload text-blue-400"></i>
+            Upload Image
+            <input
+              type="file"
+              class="file-input-element hidden"
+              accept="image/*"
+            >
+          </label>
+
+          <button
+            id="pause-btn"
+            type="button"
+            title="Pause Stream"
+            class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition border border-slate-700 shrink-0"
+          >
+            <i class="fa-solid fa-pause"></i>
+          </button>
+
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-slate-400 px-1">
+
+        <span id="camera-facing-label">
+          <i class="fa-solid fa-video text-slate-500"></i>
+          Rear Camera
+        </span>
+
+        <span id="resolution-label">
+          Waiting for camera • Gemini 3 Flash
+        </span>
+
+      </div>
+    </section>
+
+    <!-- RIGHT -->
+    <section class="lg:col-span-5 flex flex-col gap-4">
+
+      <!-- ANALYSIS MODE -->
+      <div class="glass-card p-5 rounded-2xl">
+
+        <h2 class="text-base font-bold font-heading text-slate-100 mb-1 flex items-center gap-2">
+          🤖 AI Analysis Mode
+        </h2>
+
+        <p class="text-xs text-slate-400 mb-3">
+          Select Focus Category (Optional - Click again to unselect):
+        </p>
+
+        <div class="category-selector">
+
+          <button id="cat-people" type="button" class="category-btn">
+            <span class="text-lg">👤</span>
+            <span>People</span>
+          </button>
+
+          <button id="cat-food" type="button" class="category-btn">
+            <span class="text-lg">🍕</span>
+            <span>Food</span>
+          </button>
+
+          <button id="cat-place" type="button" class="category-btn">
+            <span class="text-lg">📍</span>
+            <span>Place</span>
+          </button>
+
+          <button id="cat-object" type="button" class="category-btn">
+            <span class="text-lg">📦</span>
+            <span>Object</span>
+          </button>
+
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 mt-2">
+
+          <button
+            id="manual-mode-btn"
+            type="button"
+            class="bg-blue-600/20 border border-blue-500/50 text-blue-300 font-semibold py-2 px-3 rounded-xl text-xs transition hover:bg-blue-600/30 text-center"
+          >
+            📸 Snapshot Mode
+          </button>
+
+          <button
+            id="auto-mode-btn"
+            type="button"
+            class="bg-slate-800 border border-slate-700 text-slate-400 font-semibold py-2 px-3 rounded-xl text-xs transition hover:bg-slate-700 text-center"
+          >
+            ⏱️ Auto Loop Mode
+          </button>
+
+        </div>
+
+        <div
+          id="auto-config"
+          class="hidden mt-3 p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex items-center justify-between"
+        >
+
+          <span class="text-xs text-slate-300 font-medium">
+            Interval Frequency:
+          </span>
+
+          <select
+            id="auto-interval-select"
+            class="bg-slate-800 text-xs text-slate-200 border border-slate-700 rounded-lg px-2 py-1 outline-none"
+          >
+            <option value="5000">Every 5 Seconds</option>
+            <option value="10000" selected>Every 10 Seconds</option>
+            <option value="15000">Every 15 Seconds</option>
+          </select>
+
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="glass-card p-5 rounded-2xl flex-grow flex flex-col justify-between">
+
+        <div>
+
+          <div class="flex items-center justify-between mb-3">
+
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+              <i class="fa-solid fa-sparkles text-blue-400"></i>
+              AI Visual Intelligence
+            </h3>
+
+            <span
+              id="analysis-time"
+              class="text-[11px] text-slate-500"
+            >
+              Ready
+            </span>
+
+          </div>
+
+          <div
+            id="loading-spinner"
+            class="hidden py-8 flex flex-col items-center justify-center text-center"
+          >
+            <i class="fa-solid fa-circle-notch fa-spin text-3xl text-blue-500 mb-3"></i>
+
+            <p class="text-xs text-slate-300 font-semibold animate-pulse">
+              Analyzing visual scene with Gemini AI...
+            </p>
+
+            <span class="text-[11px] text-slate-500 mt-1">
+              Extracting features & context
+            </span>
+          </div>
+
+          <div
+            id="analysis-output"
+            class="text-xs text-slate-300 leading-relaxed space-y-2 max-h-64 overflow-y-auto pr-1"
+            aria-live="polite"
+          >
+            <p class="text-slate-500 italic">
+              Click "Snap & Analyze" or enable "Auto Loop Mode" to start observing scene information.
+            </p>
+          </div>
+
+          <!-- MULTILINGUAL LISTENING -->
+          <div id="language-panel" class="hidden mt-4 pt-3 border-t border-slate-800/80">
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <i class="fa-solid fa-language text-blue-400 mr-1"></i>
+                Listen in another language
+              </h4>
+              <span id="translation-status" class="text-[10px] text-slate-500"></span>
+            </div>
+
+            <div id="language-buttons" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <button type="button" class="language-btn" data-language="en-US">🇬🇧 English</button>
+              <button type="button" class="language-btn" data-language="zh-CN">🇨🇳 Chinese</button>
+              <button type="button" class="language-btn" data-language="es-ES">🇪🇸 Spanish</button>
+              <button type="button" class="language-btn" data-language="ja-JP">🇯🇵 Japanese</button>
+              <button type="button" class="language-btn" data-language="vi-VN">🇻🇳 Vietnamese</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ACTION FOOTER: Listen, Stop, Copy -->
+        <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+
+          <div class="flex items-center gap-2">
+            <button
+              id="speak-btn"
+              type="button"
+              class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 opacity-50 cursor-not-allowed"
+              disabled
+            >
+              <i class="fa-solid fa-volume-high text-blue-400"></i>
+              Listen
+            </button>
+
+            <button
+              id="stop-btn"
+              type="button"
+              class="bg-slate-800 hover:bg-slate-700 text-rose-300 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 opacity-50 cursor-not-allowed"
+              disabled
+            >
+              <i class="fa-solid fa-square text-rose-400"></i>
+              Stop
+            </button>
+          </div>
+
+          <button
+            id="copy-btn"
+            type="button"
+            class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 opacity-50 cursor-not-allowed"
+            disabled
+          >
+            <i class="fa-solid fa-copy text-slate-400"></i>
+            Copy
+          </button>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast -->
+  <div
+    id="toast"
+    class="fixed bottom-6 right-6 bg-slate-900 border border-slate-700 text-slate-100 text-xs px-4 py-3 rounded-xl shadow-2xl transition transform translate-y-20 opacity-0 pointer-events-none flex items-center gap-2 z-50"
+  >
+    <i id="toast-icon" class="fa-solid fa-circle-info text-blue-400"></i>
+    <span id="toast-message"></span>
+  </div>
+
+  <!-- API KEY MODAL -->
+  <div
+    id="api-modal"
+    class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+  >
+
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-md">
+
+      <div class="flex items-center justify-between mb-4">
+
+        <h2 class="text-lg font-bold">
+          Gemini API Key
+        </h2>
+
+        <button
+          id="close-api-modal"
+          type="button"
+          class="text-slate-400 hover:text-white text-xl"
+        >
+          &times;
+        </button>
+
+      </div>
+
+      <p class="text-xs text-slate-400 mb-4">
+        Enter your Gemini API key for this browser session.
+        For production deployment, use a server-side proxy instead of exposing an API key in client-side code.
+      </p>
+
+      <input
+        id="api-key-input"
+        type="password"
+        autocomplete="off"
+        placeholder="Paste Gemini API key"
+        class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white outline-none focus:border-blue-500"
+      >
+
+      <div class="flex gap-2 mt-4">
+
+        <button
+          id="save-api-key"
+          type="button"
+          class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-xl text-sm"
+        >
+          Save Key
+        </button>
+
+        <button
+          id="clear-api-key"
+          type="button"
+          class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-4 py-2.5 rounded-xl text-sm"
+        >
+          Clear
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CONFIG = {
+      GEMINI_MODEL: "gemini-3-flash-preview"
+    };
+
+    let apiKey = "";
+
+    let currentMode = "manual";
+    let autoAnalysisTimer = null;
+    let autoAnalysisRunning = false;
+    let analysisInProgress = false;
+    let selectedCategory = null;
+
+    let currentFacingMode = "environment";
+    let mediaStream = null;
+    let isStreamPaused = false;
+
+    let currentAnalysisResultText = "";
+    let currentSpokenText = "";
+    let selectedSpeechLanguage = "en-US";
+    let translationInProgress = false;
+    let translationAbortController = null;
+
+    const SPEECH_LANGUAGES = {
+      "en-US": { name: "English", instruction: "English", voiceCodes: ["en-US", "en-GB", "en"] },
+      "zh-CN": { name: "Chinese", instruction: "Simplified Chinese", voiceCodes: ["zh-CN", "zh"] },
+      "es-ES": { name: "Spanish", instruction: "Spanish", voiceCodes: ["es-ES", "es-MX", "es"] },
+      "ja-JP": { name: "Japanese", instruction: "Japanese", voiceCodes: ["ja-JP", "ja"] },
+      "vi-VN": { name: "Vietnamese", instruction: "Vietnamese", voiceCodes: ["vi-VN", "vi"] }
+    };
+
+    const webcam = document.getElementById("webcam");
+    const captureCanvas = document.getElementById("capture-canvas");
+    const analysisOutput = document.getElementById("analysis-output");
+    const loadingSpinner = document.getElementById("loading-spinner");
+
+    /*
+     * API KEY MANAGEMENT
+     */
+    function openApiModal() {
+      document.getElementById("api-modal").classList.remove("hidden");
+      document.getElementById("api-key-input").value = apiKey;
+      setTimeout(() => {
+        document.getElementById("api-key-input").focus();
+      }, 50);
+    }
+
+    function closeApiModal() {
+      document.getElementById("api-modal").classList.add("hidden");
+    }
+
+    function saveApiKey() {
+      const input = document.getElementById("api-key-input");
+      const value = input.value.trim();
+
+      if (!value) {
+        showToast("Please enter a Gemini API key.", "warning");
+        return;
+      }
+
+      apiKey = value;
+      closeApiModal();
+      showToast("Gemini API key saved for this session.");
+    }
+
+    function clearApiKey() {
+      apiKey = "";
+      document.getElementById("api-key-input").value = "";
+      showToast("API key cleared.");
+    }
+
+    async function initCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showCameraFallback("Camera access is not supported by this browser.");
+        return;
+      }
+
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+      }
+
+      isStreamPaused = false;
+
+      const constraints = {
+        video: {
+          facingMode: { ideal: currentFacingMode },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: false
+      };
+
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        webcam.srcObject = mediaStream;
+        await webcam.play().catch(() => {});
+
+        document.getElementById("camera-fallback").classList.add("hidden");
+        updateCameraLabel();
+        updateResolutionLabel();
+
+        showToast(
+          currentFacingMode === "environment"
+            ? "Rear camera ready."
+            : "Front camera ready."
+        );
+      } catch (error) {
+        console.error("Camera error:", error);
+        showCameraFallback("Camera access is unavailable or permission was denied.");
+        showToast("Camera access restricted or unavailable.", "warning");
+      }
+    }
+
+    function showCameraFallback(message) {
+      const fallback = document.getElementById("camera-fallback");
+      fallback.querySelector("p").textContent = message;
+      fallback.classList.remove("hidden");
+    }
+
+    function updateCameraLabel() {
+      const label = document.getElementById("camera-facing-label");
+      label.innerHTML =
+        '<i class="fa-solid fa-video text-slate-500"></i> ' +
+        (currentFacingMode === "environment" ? "Rear Camera" : "Front Camera");
+    }
+
+    function updateResolutionLabel() {
+      if (!webcam.videoWidth || !webcam.videoHeight) return;
+      document.getElementById("resolution-label").textContent =
+        `${webcam.videoWidth}x${webcam.videoHeight} • Gemini 3 Flash`;
+    }
+
+    async function switchCamera() {
+      currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
+      await initCamera();
+    }
+
+    function togglePauseStream() {
+      if (!mediaStream) {
+        showToast("Camera is not active.", "warning");
+        return;
+      }
+
+      const videoTracks = mediaStream.getVideoTracks();
+      if (!videoTracks.length) {
+        showToast("No camera track is available.", "warning");
+        return;
+      }
+
+      isStreamPaused = !isStreamPaused;
+
+      videoTracks.forEach(track => {
+        track.enabled = !isStreamPaused;
+      });
+
+      const pauseBtn = document.getElementById("pause-btn");
+
+      if (isStreamPaused) {
+        pauseBtn.innerHTML = '<i class="fa-solid fa-play text-emerald-400"></i>';
+        showToast("Camera paused.");
+      } else {
+        pauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        showToast("Camera resumed.");
+      }
+    }
+
+    function captureBase64Frame() {
+      if (!mediaStream || isStreamPaused || !webcam.videoWidth || !webcam.videoHeight) {
+        return null;
+      }
+
+      captureCanvas.width = webcam.videoWidth;
+      captureCanvas.height = webcam.videoHeight;
+
+      const ctx = captureCanvas.getContext("2d", { willReadFrequently: false });
+      ctx.drawImage(webcam, 0, 0, captureCanvas.width, captureCanvas.height);
+
+      const flash = document.getElementById("flash-overlay");
+      flash.classList.remove("shutter-flash");
+      void flash.offsetWidth;
+      flash.classList.add("shutter-flash");
+
+      const fullDataUrl = captureCanvas.toDataURL("image/jpeg", 0.85);
+      const base64 = fullDataUrl.split(",")[1];
+
+      return base64 || null;
+    }
+
+    function selectCategory(category) {
+      selectedCategory = selectedCategory === category ? null : category;
+      updateCategoryUI();
+    }
+
+    function updateCategoryUI() {
+      const categories = ["people", "food", "place", "object"];
+      const badge = document.getElementById("badge-category");
+
+      categories.forEach(category => {
+        const button = document.getElementById(`cat-${category}`);
+        if (!button) return;
+        button.classList.toggle("active", selectedCategory === category);
+      });
+
+      if (selectedCategory) {
+        badge.textContent = `🎯 Focus: ${selectedCategory.toUpperCase()}`;
+        badge.classList.remove("hidden");
+      } else {
+        badge.classList.add("hidden");
+      }
+    }
+
+    function getPrompt(category) {
+      switch (category) {
+        case "people":
+          return `
+Focus specifically on people visible in this image.
+Describe:
+- Approximate number of people
+- Visible positions, poses, or activities
+- Clearly visible facial expressions, if appropriate
+- Notable clothing or accessories
+Keep the description objective, respectful, and concise.`.trim();
+
+        case "food":
+          return `
+Focus specifically on food and beverages visible in this image.
+Provide:
+1. Names of the food or beverage items
+2. Approximate quantity of each visible item
+3. If appropriate, provide a clearly labeled rough calorie estimate and brief nutritional context
+Do not claim exact nutritional information from appearance alone.
+If no food is present, state: "No food items detected in this view."`.trim();
+
+        case "place":
+          return `
+Focus specifically on the location, environment, or setting.
+Describe:
+- Indoor or outdoor setting
+- Scenery / Architecture / Atmosphere
+- Famous or identifiable landmarks only when there is enough visual evidence
+- General purpose or context of the space
+Do not invent a specific location when the image does not provide enough evidence.`.trim();
+
+        case "object":
+          return `
+Focus specifically on the main inanimate objects.
+Describe:
+- Primary objects
+- Approximate count
+- What the objects appear to be used for
+- What is happening with the objects
+Keep the description concise and objective.`.trim();
+
+        default:
+          return `
+Analyze this image as a visual AI assistant.
+Describe:
+- Main objects
+- People, if visible
+- Environment or setting
+- Important readable text
+- Interesting visible details or actions
+Keep the response concise, informative, and accurate. Do not guess without visual evidence.`.trim();
+      }
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+
+      const manualBtn = document.getElementById("manual-mode-btn");
+      const autoBtn = document.getElementById("auto-mode-btn");
+      const autoConfig = document.getElementById("auto-config");
+      const badgeMode = document.getElementById("badge-mode");
+
+      if (mode === "auto") {
+        manualBtn.className = "bg-slate-800 border border-slate-700 text-slate-400 font-semibold py-2 px-3 rounded-xl text-xs transition hover:bg-slate-700 text-center";
+        autoBtn.className = "bg-blue-600/20 border border-blue-500/50 text-blue-300 font-semibold py-2 px-3 rounded-xl text-xs transition hover:bg-blue-600/30 text-center";
+        autoConfig.classList.remove("hidden");
+        badgeMode.innerHTML = "⏱️ Auto Loop Active";
+        badgeMode.className = "bg-slate-900/80 backdrop-blur-md border border-emerald-500/50 text-emerald-400 text-xs px-3 py-1 rounded-full font-semibold";
+
+        startAutoLoop();
+      } else {
+        autoBtn.className = "bg-slate-800 border border-slate-700 text-slate-400 font-semibold py-2 px-3 rounded-xl text-xs transition hover:bg-slate-700 text-center";
+        manualBtn.className = "bg-blue-600/20 border border-blue-500/50 text-blue-300 font-semibold py-2 px-3 rounded-xl text-xs transition hover:bg-blue-600/30 text-center";
+        autoConfig.classList.add("hidden");
+        badgeMode.innerHTML = "📸 Manual Snap Mode";
+        badgeMode.className = "bg-slate-900/80 backdrop-blur-md border border-slate-700 text-emerald-400 text-xs px-3 py-1 rounded-full font-semibold";
+
+        stopAutoLoop();
+      }
+    }
+
+    function startAutoLoop() {
+      stopAutoLoop();
+
+      const select = document.getElementById("auto-interval-select");
+      const intervalMs = Math.max(5000, parseInt(select.value, 10) || 10000);
+
+      autoAnalysisRunning = true;
+
+      if (mediaStream && webcam.videoWidth && !isStreamPaused) {
+        triggerManualCapture();
+      }
+
+      autoAnalysisTimer = setInterval(() => {
+        if (
+          autoAnalysisRunning &&
+          !analysisInProgress &&
+          mediaStream &&
+          webcam.videoWidth &&
+          !isStreamPaused
+        ) {
+          triggerManualCapture();
+        }
+      }, intervalMs);
+    }
+
+    function stopAutoLoop() {
+      autoAnalysisRunning = false;
+      if (autoAnalysisTimer) {
+        clearInterval(autoAnalysisTimer);
+        autoAnalysisTimer = null;
+      }
+    }
+
+    function restartAutoInterval() {
+      if (currentMode === "auto") {
+        startAutoLoop();
+      }
+    }
+
+    async function triggerManualCapture() {
+      if (analysisInProgress) return;
+
+      if (!apiKey) {
+        openApiModal();
+        showToast("Enter your Gemini API key first.", "warning");
+        return;
+      }
+
+      const base64Data = captureBase64Frame();
+      if (!base64Data) {
+        showToast("Camera is not ready. Please wait or upload an image.", "warning");
+        return;
+      }
+
+      await analyzeImage(base64Data, apiKey);
+    }
+
+    async function analyzeImage(base64Image, key) {
+      if (!key) {
+        showToast("Gemini API key is missing.", "error");
+        return;
+      }
+
+      analysisInProgress = true;
+      showLoading(true);
+
+      const promptText = getPrompt(selectedCategory);
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.GEMINI_MODEL}:generateContent?key=${encodeURIComponent(key)}`;
+
+      const payload = {
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: promptText },
+              {
+                inlineData: {
+                  mimeType: "image/jpeg",
+                  data: base64Image
+                }
+              }
+            ]
+          }
+        ]
+      };
+
+      let retries = 0;
+      const maxRetries = 3;
+      let delay = 1000;
+
+      try {
+        while (retries <= maxRetries) {
+          try {
+            const response = await fetch(apiUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+              let errorMessage = `API request failed (${response.status}).`;
+              try {
+                const errorData = await response.json();
+                if (errorData?.error?.message) {
+                  errorMessage = errorData.error.message;
+                }
+              } catch (_) {}
+              throw new Error(errorMessage);
+            }
+
+            const result = await response.json();
+            const responseText = result?.candidates?.[0]?.content?.parts
+              ?.map(part => part.text || "")
+              .join("")
+              .trim();
+
+            if (!responseText) {
+              throw new Error("Gemini returned no text response.");
+            }
+
+            displayAnalysisResult(responseText);
+            break;
+
+          } catch (error) {
+            retries++;
+            if (retries > maxRetries) throw error;
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 2;
+          }
+        }
+      } catch (error) {
+        console.error("Gemini Analysis Failure:", error);
+        displayAnalysisError(error.message || "Failed to complete scene analysis.");
+      } finally {
+        showLoading(false);
+        analysisInProgress = false;
+      }
+    }
+
+    function showLoading(isLoading) {
+      if (isLoading) {
+        loadingSpinner.classList.remove("hidden");
+        analysisOutput.classList.add("hidden");
+      } else {
+        loadingSpinner.classList.add("hidden");
+        analysisOutput.classList.remove("hidden");
+      }
+    }
+
+    function escapeHtml(value) {
+      const div = document.createElement("div");
+      div.textContent = value;
+      return div.innerHTML;
+    }
+
+    function formatAnalysisText(text) {
+      const escaped = escapeHtml(text);
+      return escaped
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-100 font-semibold">$1</strong>')
+        .replace(/\n\n/g, '</p><p class="mt-2">')
+        .replace(/\n/g, "<br>");
+    }
+
+    function displayAnalysisResult(text) {
+      stopSpeechAndTranslation();
+
+      currentAnalysisResultText = text;
+      currentSpokenText = text;
+      selectedSpeechLanguage = "en-US";
+
+      const formatted = formatAnalysisText(text);
+      analysisOutput.innerHTML = `<p class="leading-relaxed">${formatted}</p>`;
+      document.getElementById("analysis-time").textContent = new Date().toLocaleTimeString();
+
+      resetLanguagePanel();
+      enableResultButtons();
+    }
+
+    function displayAnalysisError(message) {
+      stopSpeechAndTranslation();
+
+      const safeMessage = escapeHtml(message);
+      analysisOutput.innerHTML = `
+        <p class="text-rose-400 flex items-center gap-2">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          ${safeMessage}
+        </p>`;
+
+      currentAnalysisResultText = "";
+      currentSpokenText = "";
+      document.getElementById("language-panel").classList.add("hidden");
+
+      disableResultButtons();
+    }
+
+    function enableResultButtons() {
+      const speakBtn = document.getElementById("speak-btn");
+      const copyBtn = document.getElementById("copy-btn");
+
+      speakBtn.disabled = false;
+      copyBtn.disabled = false;
+
+      speakBtn.classList.remove("opacity-50", "cursor-not-allowed");
+      copyBtn.classList.remove("opacity-50", "cursor-not-allowed");
+    }
+
+    function disableResultButtons() {
+      const speakBtn = document.getElementById("speak-btn");
+      const copyBtn = document.getElementById("copy-btn");
+
+      speakBtn.disabled = true;
+      copyBtn.disabled = true;
+
+      speakBtn.classList.add("opacity-50", "cursor-not-allowed");
+      copyBtn.classList.add("opacity-50", "cursor-not-allowed");
+
+      stopSpeechAndTranslation();
+    }
+
+    function resetLanguagePanel() {
+      const panel = document.getElementById("language-panel");
+      const status = document.getElementById("translation-status");
+
+      panel.classList.remove("hidden");
+      status.textContent = "Original: English";
+
+      document.querySelectorAll(".language-btn").forEach(button => {
+        button.disabled = false;
+        button.classList.toggle("active", button.dataset.language === "en-US");
+      });
+    }
+
+    function setLanguageButtonsDisabled(disabled) {
+      document.querySelectorAll(".language-btn").forEach(button => {
+        button.disabled = disabled;
+      });
+    }
+
+    function setStopButtonActive(active) {
+      const stopBtn = document.getElementById("stop-btn");
+      if (!stopBtn) return;
+
+      if (active) {
+        stopBtn.disabled = false;
+        stopBtn.classList.remove("opacity-50", "cursor-not-allowed");
+      } else {
+        stopBtn.disabled = true;
+        stopBtn.classList.add("opacity-50", "cursor-not-allowed");
+      }
+    }
+
+    function stopSpeechAndTranslation() {
+      if (translationAbortController) {
+        translationAbortController.abort();
+        translationAbortController = null;
+      }
+
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      translationInProgress = false;
+      setLanguageButtonsDisabled(false);
+
+      const speakBtn = document.getElementById("speak-btn");
+      if (speakBtn) {
+        speakBtn.innerHTML = '<i class="fa-solid fa-volume-high text-blue-400"></i> Listen';
+      }
+
+      setStopButtonActive(false);
+
+      const status = document.getElementById("translation-status");
+      if (status && status.textContent.includes("Translating")) {
+        status.textContent = "Translation canceled";
+      }
+    }
+
+    function getSpeechVoice(languageCode) {
+      if (!("speechSynthesis" in window)) return null;
+
+      const voices = window.speechSynthesis.getVoices();
+      const language = SPEECH_LANGUAGES[languageCode];
+      if (!language) return null;
+
+      return voices.find(voice =>
+        language.voiceCodes.some(code =>
+          voice.lang.toLowerCase().startsWith(code.toLowerCase())
+        )
+      ) || null;
+    }
+
+    async function translateAnalysisText(languageCode) {
+      if (!currentAnalysisResultText || !apiKey) {
+        return currentAnalysisResultText;
+      }
+
+      if (languageCode === "en-US") {
+        return currentAnalysisResultText;
+      }
+
+      const language = SPEECH_LANGUAGES[languageCode];
+      const status = document.getElementById("translation-status");
+
+      const translationPrompt = `
+Translate the following visual scene description into ${language.instruction}.
+
+Requirements:
+- Preserve original meaning and factual details.
+- Do not add extra information.
+- Keep tone objective, respectful, and concise.
+- Return ONLY translated text.
+
+Original description:
+${currentAnalysisResultText}`.trim();
+
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.GEMINI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+      translationAbortController = new AbortController();
+
+      const payload = {
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: translationPrompt }]
+          }
+        ]
+      };
+
+      status.textContent = `Translating to ${language.name}...`;
+      translationInProgress = true;
+      setLanguageButtonsDisabled(true);
+      setStopButtonActive(true);
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: translationAbortController.signal
+        });
+
+        if (!response.ok) {
+          throw new Error(`Translation request failed (${response.status}).`);
+        }
+
+        const result = await response.json();
+        const translatedText = result?.candidates?.[0]?.content?.parts
+          ?.map(part => part.text || "")
+          .join("")
+          .trim();
+
+        if (!translatedText) {
+          throw new Error("Gemini returned no translated text.");
+        }
+
+        currentSpokenText = translatedText;
+        selectedSpeechLanguage = languageCode;
+        status.textContent = `Translated: ${language.name}`;
+
+        document.querySelectorAll(".language-btn").forEach(button => {
+          button.classList.toggle("active", button.dataset.language === languageCode);
+        });
+
+        return translatedText;
+
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          console.log("Translation aborted by user.");
+          return null;
+        }
+        throw error;
+      } finally {
+        translationAbortController = null;
+        translationInProgress = false;
+        setLanguageButtonsDisabled(false);
+      }
+    }
+
+    async function listenInLanguage(languageCode) {
+      stopSpeechAndTranslation();
+
+      if (!currentAnalysisResultText) return;
+
+      if (!("speechSynthesis" in window)) {
+        showToast("Text-to-speech is not supported in this browser.", "warning");
+        return;
+      }
+
+      try {
+        setStopButtonActive(true);
+
+        const textToSpeak = await translateAnalysisText(languageCode);
+
+        if (!textToSpeak) {
+          setStopButtonActive(false);
+          return;
+        }
+
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.lang = languageCode;
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+
+        const voice = getSpeechVoice(languageCode);
+        if (voice) {
+          utterance.voice = voice;
+        }
+
+        const speakBtn = document.getElementById("speak-btn");
+        speakBtn.innerHTML = '<i class="fa-solid fa-volume-xmark text-amber-400"></i> Speaking...';
+
+        utterance.onend = () => {
+          speakBtn.innerHTML = '<i class="fa-solid fa-volume-high text-blue-400"></i> Listen';
+          setStopButtonActive(false);
+        };
+
+        utterance.onerror = (e) => {
+          speakBtn.innerHTML = '<i class="fa-solid fa-volume-high text-blue-400"></i> Listen';
+          setStopButtonActive(false);
+          if (e.error !== 'interrupted' && e.error !== 'canceled') {
+            showToast(
+              `No compatible ${SPEECH_LANGUAGES[languageCode].name} voice was found or speech failed.`,
+              "warning"
+            );
+          }
+        };
+
+        window.speechSynthesis.speak(utterance);
+
+      } catch (error) {
+        setStopButtonActive(false);
+        console.error("Multilingual speech failure:", error);
+        document.getElementById("translation-status").textContent = "Translation failed";
+        showToast(error.message || "Unable to translate description.", "error");
+      }
+    }
+
+    function speakText() {
+      listenInLanguage(selectedSpeechLanguage || "en-US");
+    }
+
+    async function copyAnalysisText() {
+      if (!currentAnalysisResultText) return;
+
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(currentAnalysisResultText);
+          showToast("Analysis text copied.");
+          return;
+        } catch (_) {}
+      }
+
+      const textArea = document.createElement("textarea");
+      textArea.value = currentAnalysisResultText;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.select();
+
+      try {
+        document.execCommand("copy");
+        showToast("Analysis text copied.");
+      } catch (_) {
+        showToast("Unable to copy text.", "error");
+      }
+
+      document.body.removeChild(textArea);
+    }
+
+    function handleFileUpload(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        showToast("Please select an image file.", "warning");
+        return;
+      }
+
+      if (!apiKey) {
+        openApiModal();
+        showToast("Enter your Gemini API key first.", "warning");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const imageDataUrl = e.target.result;
+        const img = new Image();
+
+        img.onload = async function() {
+          webcam.srcObject = null;
+          captureCanvas.width = img.naturalWidth;
+          captureCanvas.height = img.naturalHeight;
+
+          const ctx = captureCanvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+
+          const jpegDataUrl = captureCanvas.toDataURL("image/jpeg", 0.85);
+          const base64Data = jpegDataUrl.split(",")[1];
+
+          if (!base64Data) {
+            showToast("Could not process image.", "error");
+            return;
+          }
+
+          document.getElementById("camera-facing-label").innerHTML =
+            '<i class="fa-solid fa-image text-slate-500"></i> Uploaded Image';
+
+          document.getElementById("resolution-label").textContent =
+            `${img.naturalWidth}x${img.naturalHeight} • Gemini 3 Flash`;
+
+          webcam.style.display = "none";
+
+          const parent = webcam.parentElement;
+          let uploadedPreview = document.getElementById("uploaded-preview");
+
+          if (!uploadedPreview) {
+            uploadedPreview = document.createElement("img");
+            uploadedPreview.id = "uploaded-preview";
+            uploadedPreview.className = "absolute inset-0 w-full h-full object-contain bg-black";
+            parent.insertBefore(uploadedPreview, webcam);
+          }
+
+          uploadedPreview.src = imageDataUrl;
+          await analyzeImage(base64Data, apiKey);
+        };
+
+        img.src = imageDataUrl;
+      };
+
+      reader.readAsDataURL(file);
+      event.target.value = "";
+    }
+
+    function showToast(message, type = "info") {
+      const toast = document.getElementById("toast");
+      const toastMsg = document.getElementById("toast-message");
+      const toastIcon = document.getElementById("toast-icon");
+
+      toastMsg.textContent = message;
+
+      if (type === "warning") {
+        toastIcon.className = "fa-solid fa-triangle-exclamation text-amber-400";
+      } else if (type === "error") {
+        toastIcon.className = "fa-solid fa-circle-xmark text-rose-400";
+      } else {
+        toastIcon.className = "fa-solid fa-circle-info text-blue-400";
+      }
+
+      toast.classList.remove("translate-y-20", "opacity-0", "pointer-events-none");
+
+      setTimeout(() => {
+        toast.classList.add("translate-y-20", "opacity-0", "pointer-events-none");
+      }, 3000);
+    }
+
+    async function restoreCameraPreview() {
+      const preview = document.getElementById("uploaded-preview");
+      if (preview) preview.remove();
+
+      webcam.style.display = "";
+      await initCamera();
+    }
+
+    document.getElementById("toggle-camera-btn").addEventListener("click", switchCamera);
+    document.getElementById("pause-btn").addEventListener("click", togglePauseStream);
+    document.getElementById("snap-btn").addEventListener("click", triggerManualCapture);
+    document.getElementById("manual-mode-btn").addEventListener("click", () => setMode("manual"));
+    document.getElementById("auto-mode-btn").addEventListener("click", () => setMode("auto"));
+    document.getElementById("auto-interval-select").addEventListener("change", restartAutoInterval);
+
+    document.getElementById("cat-people").addEventListener("click", () => selectCategory("people"));
+    document.getElementById("cat-food").addEventListener("click", () => selectCategory("food"));
+    document.getElementById("cat-place").addEventListener("click", () => selectCategory("place"));
+    document.getElementById("cat-object").addEventListener("click", () => selectCategory("object"));
+
+    document.querySelectorAll(".file-input-element").forEach(input => {
+      input.addEventListener("change", handleFileUpload);
+    });
+    document.getElementById("speak-btn").addEventListener("click", speakText);
+
+    /* Stop speech / translation event listener */
+    document.getElementById("stop-btn").addEventListener("click", () => {
+      stopSpeechAndTranslation();
+      showToast("Audio playback / translation stopped.");
+    });
+
+    document.getElementById("copy-btn").addEventListener("click", copyAnalysisText);
+
+    document.querySelectorAll(".language-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        listenInLanguage(button.dataset.language);
+      });
+    });
+
+    document.getElementById("api-key-btn").addEventListener("click", openApiModal);
+    document.getElementById("close-api-modal").addEventListener("click", closeApiModal);
+    document.getElementById("save-api-key").addEventListener("click", saveApiKey);
+    document.getElementById("clear-api-key").addEventListener("click", clearApiKey);
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") closeApiModal();
+    });
+
+    webcam.addEventListener("loadedmetadata", updateResolutionLabel);
+
+    window.addEventListener("load", async () => {
+      updateCategoryUI();
+      setMode("manual");
+      await initCamera();
+    });
+
+    window.addEventListener("beforeunload", () => {
+      stopAutoLoop();
+      stopSpeechAndTranslation();
+
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+      }
+    });
+  </script>
+
+</body>
+</html>
